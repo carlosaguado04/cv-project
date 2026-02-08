@@ -308,6 +308,35 @@
     animation: snitch-trail-fade 1.2s ease-out infinite;
     pointer-events: none;
   }
+  .snitch-3d-wrap {
+    position: fixed;
+    height: 90px;
+    width: 90px;
+    z-index: 30;
+    pointer-events: auto;
+  }
+  .snitch-3d-canvas {
+    height: 100%;
+    width: 100%;
+  }
+  .snitch-3d-button {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    .snitch-3d-wrap {
+      height: 70px;
+      width: 70px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .snitch-3d-wrap {
+      transition: none;
+    }
+  }
 }
 
 @keyframes fade-up {

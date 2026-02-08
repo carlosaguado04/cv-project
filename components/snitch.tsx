@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import type { Group } from "three";
 
 type Point = { x: number; y: number };
 
@@ -16,8 +19,30 @@ const randomBetween = (min: number, max: number) =>
 
 const randomPoint = (): Point => ({
   x: randomBetween(8, 92),
-  y: randomBetween(12, 88),
+  y: randomBetween(14, 86),
 });
+
+function SnitchModel() {
+  const group = useRef<Group>(null);
+  const gltf = useGLTF("/models/golden_snitch.glb");
+
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    if (group.current) {
+      group.current.rotation.x = Math.sin(t * 0.9) * 0.2;
+      group.current.position.y = Math.sin(t * 2.2) * 0.03;
+    }
+  });
+
+  return (
+    <group ref={group}>
+      <primitive object={gltf.scene} scale={0.45} />
+      <pointLight color="#ffd36a" intensity={1.9} distance={8} />
+    </group>
+  );
+}
+
+useGLTF.preload("/models/golden_snitch.glb");
 
 export default function Snitch() {
   const [mounted, setMounted] = useState(false);
@@ -25,20 +50,20 @@ export default function Snitch() {
   const [state, setState] = useState<SnitchState>(() => ({
     from: randomPoint(),
     to: randomPoint(),
-    duration: randomBetween(1.5, 3),
+    duration: randomBetween(0.55, 1.2),
     visible: false,
   }));
 
   const id = useMemo(() => `snitch-${Math.random().toString(36).slice(2)}`, []);
   const particles = useMemo(
     () =>
-      Array.from({ length: 12 }, (_, index) => ({
-        x: randomBetween(-44, -6),
-        y: randomBetween(-22, 22),
-        size: randomBetween(1.5, 3.2),
-        delay: randomBetween(0, 0.8),
-        drift: randomBetween(-8, -2),
-        opacity: randomBetween(0.45, 0.9),
+      Array.from({ length: 14 }, (_, index) => ({
+        x: randomBetween(-42, -6),
+        y: randomBetween(-20, 20),
+        size: randomBetween(1.4, 3.4),
+        delay: randomBetween(0, 0.6),
+        drift: randomBetween(-10, -2),
+        opacity: randomBetween(0.5, 0.9),
         order: index,
       })),
     []
@@ -52,7 +77,7 @@ export default function Snitch() {
     setState({
       from: randomPoint(),
       to: randomPoint(),
-      duration: randomBetween(1.6, 3.2),
+      duration: randomBetween(0.55, 1.2),
       visible: true,
     });
   }, []);
@@ -62,22 +87,18 @@ export default function Snitch() {
       setState((prev) => ({
         from: prev.to,
         to: randomPoint(),
-        duration: randomBetween(1.6, 3.2),
-        visible: Math.random() > 0.1,
+        duration: randomBetween(0.55, 1.2),
+        visible: Math.random() > 0.08,
       }));
     };
 
-    const timeout = setTimeout(tick, randomBetween(600, 1100));
-    const interval = setInterval(tick, randomBetween(1200, 2000));
+    const timeout = setTimeout(tick, randomBetween(350, 700));
+    const interval = setInterval(tick, randomBetween(700, 1100));
     return () => {
       clearTimeout(timeout);
       clearInterval(interval);
     };
   }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   const toggleTheme = () => {
     const next = !hpTheme;
@@ -86,29 +107,26 @@ export default function Snitch() {
     localStorage.setItem("hp-theme", next ? "on" : "off");
   };
 
+  if (!mounted) {
+    return null;
+  }
+
   const angle =
     (Math.atan2(state.to.y - state.from.y, state.to.x - state.from.x) * 180) /
     Math.PI;
 
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className="snitch-wrap"
+    <div
+      className="snitch-3d-wrap"
       style={{
         opacity: state.visible ? 1 : 0,
         left: `${state.to.x}%`,
         top: `${state.to.y}%`,
         transform: "translate(-50%, -50%)",
-        transition: `left ${state.duration}s ease-in-out, top ${state.duration}s ease-in-out, opacity 0.4s ease`,
+        transition: `left ${state.duration}s linear, top ${state.duration}s linear, opacity 0.35s ease`,
       }}
-      aria-label="Toggle secret theme"
       id={id}
     >
-      <div
-        className="snitch-hitbox"
-        style={{ opacity: state.visible ? 1 : 0.001 }}
-      />
       <div
         className="snitch-particles"
         style={{
@@ -126,13 +144,29 @@ export default function Snitch() {
               height: `${particle.size}px`,
               opacity: particle.opacity,
               animationDelay: `${particle.delay}s`,
-              animationDuration: `${1.1 + particle.order * 0.05}s`,
+              animationDuration: `${0.8 + particle.order * 0.04}s`,
               transform: `translateX(${particle.drift}px)`,
             }}
           />
         ))}
       </div>
-      <span className="snitch" aria-hidden="true" />
-    </button>
+      <Canvas
+        className="snitch-3d-canvas"
+        camera={{ position: [0, 0, 2], fov: 38 }}
+        dpr={[1, 1.6]}
+      >
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[2, 2, 3]} intensity={1.1} />
+        <Suspense fallback={null}>
+          <SnitchModel />
+        </Suspense>
+      </Canvas>
+      <button
+        type="button"
+        aria-label="Toggle secret theme"
+        className="snitch-3d-button"
+        onClick={toggleTheme}
+      />
+    </div>
   );
 }
