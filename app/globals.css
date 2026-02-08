@@ -310,8 +310,8 @@
   }
   .snitch-3d-wrap {
     position: fixed;
-    height: clamp(120px, 12vw, 200px);
-    width: clamp(120px, 12vw, 200px);
+    height: clamp(160px, 18vw, 260px);
+    width: clamp(160px, 18vw, 260px);
     z-index: 30;
     pointer-events: auto;
   }
@@ -328,8 +328,8 @@
   }
   @media (max-width: 640px) {
     .snitch-3d-wrap {
-      height: clamp(90px, 18vw, 140px);
-      width: clamp(90px, 18vw, 140px);
+      height: clamp(120px, 26vw, 200px);
+      width: clamp(120px, 26vw, 200px);
     }
   }
   @media (prefers-reduced-motion: reduce) {
