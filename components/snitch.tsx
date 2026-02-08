@@ -36,7 +36,7 @@ function SnitchModel() {
 
   return (
     <group ref={group}>
-      <primitive object={gltf.scene} scale={0.8} />
+      <primitive object={gltf.scene} scale={0.65} />
       <pointLight color="#ffd36a" intensity={1.9} distance={8} />
     </group>
   );
